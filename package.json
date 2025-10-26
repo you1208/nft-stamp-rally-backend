@@ -6,8 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "postinstall": "npx -y prisma generate"
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
