@@ -1,38 +1,54 @@
 const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
 const session = require('express-session');
-const passport = require('./config/passport');
+const passport = require('passport');
+const cors = require('cors');
+require('dotenv').config();
 
-dotenv.config();
+const authRoutes = require('./routes/auth');
+const stampRoutes = require('./routes/stamps');
+const userRoutes = require('./routes/users');
+const compositeRoutes = require('./routes/composites');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const stampsRoutes = require('./routes/stamps');
-const usersRoutes = require('./routes/users');
-const compositesRoutes = require('./routes/composites');
-const authRoutes = require('./routes/auth');
-const nftRoutes = require('./routes/nft');  //
-
+// CORS設定
 app.use(cors({
-  origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000'],
-  credentials: true
+  origin: process.env.FRONTEND_URL || 'http://localhost:5500',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Bodyパーサー
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session設定
 app.use(session({
-  secret: process.env.JWT_SECRET,
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24時間
+  }
 }));
+
+// Passport初期化
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ルート設定
+app.use('/api/auth', authRoutes);
+app.use('/api/stamps', stampRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/composites', compositeRoutes);
+
+// ルートエンドポイント
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'NFT Stamp Rally API',
     status: 'running',
     version: '1.0.0',
@@ -45,27 +61,20 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy' });
-});
-
-app.use('/api/stamps', stampsRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/composites', compositesRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/nft', nftRoutes);
-
-app.use((req, res) => {
-  res.status(404).json({ error: 'エンドポイントが見つかりません' });
-});
-
+// エラーハンドリング
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'サーバーエラーが発生しました' });
+  console.error('Error:', err);
+  res.status(500).json({ 
+    error: 'サーバーエラーが発生しました',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
 });
 
+// サーバー起動
 app.listen(PORT, () => {
-  console.log('Server running on http://localhost:' + PORT);
-  console.log('Environment:', process.env.NODE_ENV || 'development');
-  console.log('API Base: http://localhost:' + PORT + '/api');
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`API Base: http://localhost:${PORT}/api`);
 });
+
+module.exports = app;
