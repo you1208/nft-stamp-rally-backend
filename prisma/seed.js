@@ -29,21 +29,21 @@ async function main() {
     {
       type: 'character',
       name: 'Robot',
-      imageUrl: 'https://via.placeholder.com/300x400/9C27B0/ffffff?text=Robot',
+      imageUrl: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=300&h=400&fit=crop',
       qrCode: 'CH001',
       description: 'かっこいいロボット'
     },
     {
       type: 'character',
       name: 'Cat',
-      imageUrl: 'https://via.placeholder.com/300x400/E91E63/ffffff?text=Cat',
+      imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&h=400&fit=crop',
       qrCode: 'CH002',
       description: 'かわいい猫'
     },
     {
       type: 'character',
       name: 'Astronaut',
-      imageUrl: 'https://via.placeholder.com/300x400/00BCD4/ffffff?text=Astronaut',
+      imageUrl: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=300&h=400&fit=crop',
       qrCode: 'CH003',
       description: '宇宙飛行士'
     }
