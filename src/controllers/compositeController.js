@@ -54,4 +54,56 @@ exports.getUserComposites = async (req, res) => {
     console.error('Error fetching composites:', error);
     res.status(500).json({ error: '合成NFTの取得に失敗しました' });
   }
+  // 高解像度画像生成
+exports.generateHighResImage = async (req, res) => {
+    try {
+        const { compositeId } = req.params;
+
+        // 合成NFTを取得
+        const composite = await prisma.compositeNft.findUnique({
+            where: { id: compositeId },
+            include: {
+                backgroundStamp: true,
+                characterStamp: true
+            }
+        });
+
+        if (!composite) {
+            return res.status(404).json({ 
+                success: false, 
+                error: '合成NFTが見つかりません' 
+            });
+        }
+
+        // 高解像度で合成（2400x1800）
+        const highResUrl = await cloudinary.uploader.upload(composite.backgroundStamp.imageUrl, {
+            folder: `nft-stamps/${composite.userId}`,
+            transformation: [
+                { width: 2400, height: 1800, crop: 'fill' },
+                {
+                    overlay: {
+                        url: composite.characterStamp.imageUrl
+                    },
+                    width: 1200,
+                    height: 1600,
+                    gravity: 'center',
+                    crop: 'fit'
+                }
+            ]
+        });
+
+        res.json({
+            success: true,
+            highResImageUrl: highResUrl.secure_url,
+            width: 2400,
+            height: 1800
+        });
+
+    } catch (error) {
+        console.error('Generate high-res image error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: '高解像度画像の生成に失敗しました' 
+        });
+    }
 };
