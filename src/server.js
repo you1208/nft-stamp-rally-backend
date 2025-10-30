@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const stampRoutes = require('./routes/stamps');
 const userRoutes = require('./routes/users');
 const compositeRoutes = require('./routes/composites');
+const nftRoutes = require('./routes/nft');  // ← 追加
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,7 +33,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24時間
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stamps', stampRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/composites', compositeRoutes);
+app.use('/api/nft', nftRoutes);  // ← 追加
 
 // ルートエンドポイント
 app.get('/', (req, res) => {
@@ -56,7 +58,8 @@ app.get('/', (req, res) => {
       stamps: '/api/stamps',
       users: '/api/users',
       composites: '/api/composites',
-      auth: '/api/auth'
+      auth: '/api/auth',
+      nft: '/api/nft'  // ← 追加
     }
   });
 });
