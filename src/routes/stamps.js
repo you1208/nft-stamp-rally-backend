@@ -2,9 +2,13 @@ const express = require('express');
 const router = express.Router();
 const stampController = require('../controllers/stampController');
 
+// 全スタンプ取得
 router.get('/', stampController.getAllStamps);
-router.get('/qr/:code', stampController.getStampByQRCode);
-router.get('/:stampId/qrcode', stampController.generateQRCode);
-router.post('/', stampController.createStamp);
+
+// スタンプ獲得
+router.post('/acquire', stampController.acquireStamp);
+
+// ユーザーのスタンプ取得
+router.get('/user/:userId', stampController.getUserStamps);
 
 module.exports = router;
