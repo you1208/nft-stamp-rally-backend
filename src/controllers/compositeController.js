@@ -1,60 +1,143 @@
-const prisma = require('../utils/prisma');
-const { createCompositeImage } = require('../utils/imageComposer');
+const { PrismaClient } = require('@prisma/client');
+const cloudinary = require('cloudinary').v2;
 
-exports.createComposite = async (req, res) => {
-  try {
-    const { userId, backgroundStampId, characterStampId } = req.body;
-    if (!userId || !backgroundStampId || !characterStampId) {
-      return res.status(400).json({ error: 'userId, backgroundStampId, characterStampId は必須です' });
-    }
-    const hasBackground = await prisma.userStamp.findUnique({
-      where: { userId_stampId: { userId, stampId: backgroundStampId } }
-    });
-    const hasCharacter = await prisma.userStamp.findUnique({
-      where: { userId_stampId: { userId, stampId: characterStampId } }
-    });
-    if (!hasBackground || !hasCharacter) {
-      return res.status(400).json({ error: '選択したスタンプを獲得していません' });
-    }
-    const backgroundStamp = await prisma.stamp.findUnique({ where: { id: backgroundStampId } });
-    const characterStamp = await prisma.stamp.findUnique({ where: { id: characterStampId } });
-    const compositeId = 'composite_' + Date.now();
-    console.log('Creating composite image...');
-    console.log('Background:', backgroundStamp.imageUrl);
-    console.log('Character:', characterStamp.imageUrl);
-    let compositeImageUrl;
+const prisma = new PrismaClient();
+
+// 全スタンプ取得
+exports.getAllStamps = async (req, res) => {
     try {
-      compositeImageUrl = await createCompositeImage(backgroundStamp.imageUrl, characterStamp.imageUrl, userId, compositeId);
-      console.log('Composite created successfully:', compositeImageUrl);
+        const stamps = await prisma.stamp.findMany({
+            orderBy: {
+                createdAt: 'asc'
+            }
+        });
+
+        // 背景とキャラクターに分類
+        const backgrounds = stamps.filter(s => s.type === 'background');
+        const characters = stamps.filter(s => s.type === 'character');
+
+        res.json({
+            success: true,
+            stamps: {
+                backgrounds,
+                characters
+            },
+            total: stamps.length
+        });
     } catch (error) {
-      console.error('Image composition failed:', error);
-      compositeImageUrl = 'composite_' + backgroundStamp.name + '_' + characterStamp.name + '.png';
+        console.error('Error fetching stamps:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'スタンプの取得に失敗しました' 
+        });
     }
-    const composite = await prisma.compositeNft.create({
-      data: { userId, backgroundStampId, characterStampId, compositeImageUrl },
-      include: { backgroundStamp: true, characterStamp: true }
-    });
-    res.status(201).json({ success: true, message: 'NFTを合成しました！', composite, compositeImageUrl });
-  } catch (error) {
-    console.error('Error creating composite:', error);
-    res.status(500).json({ error: 'NFTの合成に失敗しました' });
-  }
 };
 
+// NFT合成
+exports.createComposite = async (req, res) => {
+    try {
+        const { userId, backgroundStampId, characterStampId } = req.body;
+
+        if (!userId || !backgroundStampId || !characterStampId) {
+            return res.status(400).json({ 
+                success: false, 
+                error: '必要なパラメータが不足しています' 
+            });
+        }
+
+        // スタンプを取得
+        const backgroundStamp = await prisma.stamp.findUnique({ 
+            where: { id: backgroundStampId } 
+        });
+        const characterStamp = await prisma.stamp.findUnique({ 
+            where: { id: characterStampId } 
+        });
+
+        if (!backgroundStamp || !characterStamp) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'スタンプが見つかりません' 
+            });
+        }
+
+        // Cloudinaryで画像を合成
+        const compositeResult = await cloudinary.uploader.upload(backgroundStamp.imageUrl, {
+            folder: `nft-stamps/${userId}`,
+            transformation: [
+                { width: 800, height: 600, crop: 'fill' },
+                {
+                    overlay: {
+                        url: characterStamp.imageUrl
+                    },
+                    width: 400,
+                    height: 533,
+                    gravity: 'center',
+                    crop: 'fit'
+                }
+            ]
+        });
+
+        // 合成NFTをDBに保存
+        const composite = await prisma.compositeNft.create({
+            data: {
+                userId,
+                backgroundStampId,
+                characterStampId,
+                compositeImageUrl: compositeResult.secure_url
+            },
+            include: {
+                backgroundStamp: true,
+                characterStamp: true
+            }
+        });
+
+        res.json({
+            success: true,
+            message: 'NFTを合成しました！',
+            composite,
+            compositeImageUrl: compositeResult.secure_url
+        });
+
+    } catch (error) {
+        console.error('Create composite error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'NFTの合成に失敗しました' 
+        });
+    }
+};
+
+// ユーザーの合成NFT一覧
 exports.getUserComposites = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const composites = await prisma.compositeNft.findMany({
-      where: { userId },
-      include: { backgroundStamp: true, characterStamp: true },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json({ success: true, composites, total: composites.length });
-  } catch (error) {
-    console.error('Error fetching composites:', error);
-    res.status(500).json({ error: '合成NFTの取得に失敗しました' });
-  }
-  // 高解像度画像生成
+    try {
+        const { userId } = req.params;
+
+        const composites = await prisma.compositeNft.findMany({
+            where: { userId },
+            include: {
+                backgroundStamp: true,
+                characterStamp: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        res.json({
+            success: true,
+            composites
+        });
+
+    } catch (error) {
+        console.error('Get user composites error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: '合成NFTの取得に失敗しました' 
+        });
+    }
+};
+
+// 高解像度画像生成
 exports.generateHighResImage = async (req, res) => {
     try {
         const { compositeId } = req.params;
