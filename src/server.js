@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth');
 const stampRoutes = require('./routes/stamps');
 const userRoutes = require('./routes/users');
 const compositeRoutes = require('./routes/composites');
-const nftRoutes = require('./routes/nft');  // ← 追加
+const nftRoutes = require('./routes/nft');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,7 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stamps', stampRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/composites', compositeRoutes);
-app.use('/api/nft', nftRoutes);  // ← 追加
+app.use('/api/nft', nftRoutes);
 
 // ルートエンドポイント
 app.get('/', (req, res) => {
@@ -59,7 +59,7 @@ app.get('/', (req, res) => {
       users: '/api/users',
       composites: '/api/composites',
       auth: '/api/auth',
-      nft: '/api/nft'  // ← 追加
+      nft: '/api/nft'
     }
   });
 });
