@@ -23,6 +23,14 @@ model User {
   compositeNfts CompositeNft[]
 
   @@unique([oauthProvider, oauthId])
+  model User {
+  // ... 既存のフィールド
+  merchandiseOrders MerchandiseOrder[]
+}
+
+model CompositeNft {
+  // ... 既存のフィールド
+  merchandiseOrders MerchandiseOrder[]
 }
 
 model Stamp {
@@ -64,4 +72,25 @@ model CompositeNft {
   user            User  @relation(fields: [userId], references: [id])
   backgroundStamp Stamp @relation("BackgroundStamp", fields: [backgroundStampId], references: [id])
   characterStamp  Stamp @relation("CharacterStamp", fields: [characterStampId], references: [id])
+model MerchandiseOrder {
+  id                String   @id @default(uuid())
+  userId            String
+  compositeId       String
+  merchandiseType   String
+  merchandiseName   String
+  size              String
+  quantity          Int      @default(1)
+  priceAmount       String
+  priceCurrency     String
+  mockupImageUrl    String
+  shippingInfo      String   // JSON string
+  status            String   @default("pending")  // pending, processing, shipped, completed
+  paymentStatus     String   @default("pending")  // pending, paid, failed
+  paymentTxHash     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id])
+  composite         CompositeNft @relation(fields: [compositeId], references: [id])
+}
 }

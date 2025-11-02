@@ -81,3 +81,8 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+const merchandiseRoutes = require('./routes/merchandise');
+
+// 既存のルート設定の後に追加
+app.use('/api/merchandise', merchandiseRoutes);
