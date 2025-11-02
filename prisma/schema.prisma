@@ -1,6 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,43 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 既存のモデル定義はそのまま...
 model User {
-  id            String   @id @default(uuid())
+  id            String         @id @default(uuid())
   oauthProvider String
   oauthId       String
-  email         String?
-  displayName   String?
-  walletAddress String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  userStamps    UserStamp[]
-  compositeNfts CompositeNft[]
-
+  email         String
+  displayName   String
+  walletAddress String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  userStamps        UserStamp[]
+  compositeNfts     CompositeNft[]
+  merchandiseOrders MerchandiseOrder[]
+  
   @@unique([oauthProvider, oauthId])
-  model User {
-  // ... 既存のフィールド
-  merchandiseOrders MerchandiseOrder[]
-}
-
-model CompositeNft {
-  // ... 既存のフィールド
-  merchandiseOrders MerchandiseOrder[]
 }
 
 model Stamp {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   type        String
   name        String
   imageUrl    String
-  qrCode      String   @unique
+  qrCode      String      @unique
   description String?
-  createdAt   DateTime @default(now())
-
-  userStamps         UserStamp[]
-  compositeBackgrounds CompositeNft[] @relation("BackgroundStamp")
-  compositeCharacters  CompositeNft[] @relation("CharacterStamp")
+  createdAt   DateTime    @default(now())
+  
+  userStamps              UserStamp[]
+  backgroundComposites    CompositeNft[] @relation("BackgroundStamp")
+  characterComposites     CompositeNft[] @relation("CharacterStamp")
 }
 
 model UserStamp {
@@ -52,10 +43,10 @@ model UserStamp {
   userId     String
   stampId    String
   acquiredAt DateTime @default(now())
-
-  user  User  @relation(fields: [userId], references: [id])
-  stamp Stamp @relation(fields: [stampId], references: [id])
-
+  
+  user       User     @relation(fields: [userId], references: [id])
+  stamp      Stamp    @relation(fields: [stampId], references: [id])
+  
   @@unique([userId, stampId])
 }
 
@@ -68,10 +59,13 @@ model CompositeNft {
   nftTokenId         String?
   nftTxHash          String?
   createdAt          DateTime @default(now())
+  
+  user               User     @relation(fields: [userId], references: [id])
+  backgroundStamp    Stamp    @relation("BackgroundStamp", fields: [backgroundStampId], references: [id])
+  characterStamp     Stamp    @relation("CharacterStamp", fields: [characterStampId], references: [id])
+  merchandiseOrders  MerchandiseOrder[]
+}
 
-  user            User  @relation(fields: [userId], references: [id])
-  backgroundStamp Stamp @relation("BackgroundStamp", fields: [backgroundStampId], references: [id])
-  characterStamp  Stamp @relation("CharacterStamp", fields: [characterStampId], references: [id])
 model MerchandiseOrder {
   id                String   @id @default(uuid())
   userId            String
@@ -83,14 +77,13 @@ model MerchandiseOrder {
   priceAmount       String
   priceCurrency     String
   mockupImageUrl    String
-  shippingInfo      String   // JSON string
-  status            String   @default("pending")  // pending, processing, shipped, completed
-  paymentStatus     String   @default("pending")  // pending, paid, failed
+  shippingInfo      String
+  status            String   @default("pending")
+  paymentStatus     String   @default("pending")
   paymentTxHash     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user              User     @relation(fields: [userId], references: [id])
+  user              User         @relation(fields: [userId], references: [id])
   composite         CompositeNft @relation(fields: [compositeId], references: [id])
-}
 }
