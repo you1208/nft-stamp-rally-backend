@@ -5,77 +5,77 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   const stamps = [
-    // Background Stamps - F1 Racing Tracks & Scenes (5)
+    // Background Stamps - F1 Racing Scenes (5)
     {
       type: 'background',
       name: 'Monaco Grand Prix',
-      imageUrl: 'https://images.unsplash.com/photo-1532906619279-a4b7267faa66?w=600&h=400&fit=crop&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=600&fit=crop&q=90',
       qrCode: 'BG001',
-      description: 'Legendary Monaco street circuit at sunset'
+      description: 'Legendary Monaco street circuit'
     },
     {
       type: 'background',
-      name: 'Spa-Francorchamps',
-      imageUrl: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&h=400&fit=crop&q=80',
+      name: 'Racing Circuit',
+      imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&h=600&fit=crop&q=90',
       qrCode: 'BG002',
-      description: 'Historic Belgian Grand Prix circuit'
+      description: 'Modern F1 racing track'
     },
     {
       type: 'background',
-      name: 'Racing Pit Lane',
-      imageUrl: 'https://images.unsplash.com/photo-1583912267550-462a6819bfbb?w=600&h=400&fit=crop&q=80',
+      name: 'Pit Lane',
+      imageUrl: 'https://images.unsplash.com/photo-1612810806563-4cb8265db55f?w=800&h=600&fit=crop&q=90',
       qrCode: 'BG003',
-      description: 'F1 pit stop action zone'
-    },
-    {
-      type: 'background',
-      name: 'Checkered Flag Zone',
-      imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&q=80',
-      qrCode: 'BG004',
-      description: 'Victory finish line atmosphere'
+      description: 'F1 pit stop zone'
     },
     {
       type: 'background',
       name: 'Victory Podium',
-      imageUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600&h=400&fit=crop&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&h=600&fit=crop&q=90',
+      qrCode: 'BG004',
+      description: 'Championship celebration'
+    },
+    {
+      type: 'background',
+      name: 'Night Race',
+      imageUrl: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&h=600&fit=crop&q=90',
       qrCode: 'BG005',
-      description: 'Championship celebration podium'
+      description: 'Singapore night circuit'
     },
-    // Character Stamps - F1 Alpine Racing Elements (5)
+    // Character Stamps - F1 Elements (5)
     {
       type: 'character',
-      name: 'Alpine F1 Car',
-      imageUrl: 'https://images.unsplash.com/photo-1594787318286-3d835c1d207f?w=400&h=500&fit=crop&q=80',
+      name: 'F1 Racing Car',
+      imageUrl: 'https://images.unsplash.com/photo-1600712242805-5f78671b24da?w=600&h=600&fit=crop&q=90',
       qrCode: 'CH001',
-      description: 'Alpine A523 Formula 1 racing machine'
+      description: 'Formula 1 racing machine'
     },
     {
       type: 'character',
-      name: 'F1 Racing Helmet',
-      imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop&q=80',
+      name: 'Racing Helmet',
+      imageUrl: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=600&fit=crop&q=90',
       qrCode: 'CH002',
-      description: 'Professional F1 driver helmet'
+      description: 'Professional driver helmet'
     },
     {
       type: 'character',
-      name: 'BlockDAG x Alpine',
-      imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=500&fit=crop&q=80',
+      name: 'Alpine Logo',
+      imageUrl: 'https://images.unsplash.com/photo-1614332625532-9b9b9b9b9b9b?w=600&h=600&fit=crop&q=90',
       qrCode: 'CH003',
-      description: 'Official partnership logo'
+      description: 'Alpine F1 Team emblem'
     },
     {
       type: 'character',
-      name: 'Championship Trophy',
-      imageUrl: 'https://images.unsplash.com/photo-1593941707874-ef25b8b4a92b?w=400&h=500&fit=crop&q=80',
+      name: 'Trophy',
+      imageUrl: 'https://images.unsplash.com/photo-1581889470536-467bdbe30cd0?w=600&h=600&fit=crop&q=90',
       qrCode: 'CH004',
-      description: 'F1 World Championship trophy'
+      description: 'Championship trophy'
     },
     {
       type: 'character',
-      name: 'Racing Number',
-      imageUrl: 'https://images.unsplash.com/photo-1595726172945-e4f285e4e5fb?w=400&h=500&fit=crop&q=80',
+      name: 'Checkered Flag',
+      imageUrl: 'https://images.unsplash.com/photo-1566168193556-cfb77d04a6c7?w=600&h=600&fit=crop&q=90',
       qrCode: 'CH005',
-      description: 'Alpine team racing number badge'
+      description: 'Victory flag'
     }
   ];
 
