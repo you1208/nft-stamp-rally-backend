@@ -84,55 +84,164 @@ exports.getOptions = async (req, res) => {
     }
 };
 
-// モックアップ画像生成
+// モックアップ画像生成（改善版）
 async function generateMockup(nftImageUrl, merchandiseType) {
     try {
+        console.log('Generating mockup for:', merchandiseType);
+        
+        // 商品テンプレートの設定
+        const mockupConfig = {
+            't-shirt': {
+                template: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 300,
+                    height: 300,
+                    x: 0,
+                    y: -50,
+                    gravity: 'center'
+                }
+            },
+            'hoodie': {
+                template: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 280,
+                    height: 280,
+                    x: 0,
+                    y: -30,
+                    gravity: 'center'
+                }
+            },
+            'mug': {
+                template: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 250,
+                    height: 250,
+                    x: -20,
+                    y: 0,
+                    gravity: 'center'
+                }
+            },
+            'poster': {
+                template: 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 400,
+                    height: 400,
+                    x: 0,
+                    y: 0,
+                    gravity: 'center'
+                }
+            },
+            'phone-case': {
+                template: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 200,
+                    height: 350,
+                    x: 0,
+                    y: -20,
+                    gravity: 'center'
+                }
+            },
+            'cap': {
+                template: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&h=800&fit=crop',
+                nftOverlay: {
+                    width: 200,
+                    height: 200,
+                    x: 0,
+                    y: 20,
+                    gravity: 'center'
+                }
+            }
+        };
+
+        const config = mockupConfig[merchandiseType] || mockupConfig['t-shirt'];
+
+        // テンプレート画像をCloudinaryにアップロード（キャッシュされる）
+        const templateUpload = await cloudinary.uploader.upload(config.template, {
+            folder: 'nft-stamp-rally/templates',
+            public_id: `${merchandiseType}_template`,
+            overwrite: false,
+            resource_type: 'image'
+        });
+
+        console.log('Template uploaded:', templateUpload.public_id);
+
         // NFT画像のpublic_idを取得
         const nftPublicId = extractPublicId(nftImageUrl);
 
-        // モックアップテンプレート（実際のテンプレート画像をCloudinaryにアップロードしておく）
-        const mockupTemplates = {
-            't-shirt': 'merchandise/templates/tshirt_white',
-            'hoodie': 'merchandise/templates/hoodie_black',
-            'mug': 'merchandise/templates/mug_white',
-            'poster': 'merchandise/templates/poster_frame',
-            'phone-case': 'merchandise/templates/phonecase_clear',
-            'cap': 'merchandise/templates/cap_black'
-        };
+        if (!nftPublicId) {
+            console.error('Could not extract NFT public_id from:', nftImageUrl);
+            return nftImageUrl;
+        }
 
-        const templateId = mockupTemplates[merchandiseType] || mockupTemplates['t-shirt'];
+        console.log('NFT public_id:', nftPublicId);
 
-        // Cloudinary変換URLを生成（NFTを商品にオーバーレイ）
-        const mockupUrl = cloudinary.url(templateId, {
+        // Cloudinary変換でNFTをテンプレートに重ねる
+        const mockupUrl = cloudinary.url(templateUpload.public_id, {
             transformation: [
                 { width: 800, height: 800, crop: 'fill' },
                 {
                     overlay: nftPublicId.replace(/\//g, ':'),
-                    width: 400,
-                    height: 400,
-                    crop: 'fit',
-                    gravity: 'center',
-                    y: merchandiseType === 't-shirt' ? 20 : 0,
-                    flags: 'layer_apply'
+                    width: config.nftOverlay.width,
+                    height: config.nftOverlay.height,
+                    crop: 'fill',
+                    gravity: config.nftOverlay.gravity,
+                    x: config.nftOverlay.x,
+                    y: config.nftOverlay.y,
+                    flags: 'layer_apply',
+                    effect: 'brightness:10'
                 },
                 { quality: 'auto:best' }
             ],
             format: 'jpg'
         });
 
+        console.log('Mockup generated:', mockupUrl);
         return mockupUrl;
+
     } catch (error) {
         console.error('Mockup generation error:', error);
-        // フォールバック：元のNFT画像を返す
         return nftImageUrl;
     }
 }
 
 function extractPublicId(cloudinaryUrl) {
-    // CloudinaryのURLからpublic_idを抽出
-    const matches = cloudinaryUrl.match(/\/v\d+\/(.+)\.(jpg|png|gif)/);
-    return matches ? matches[1] : '';
+    try {
+        // CloudinaryのURLからpublic_idを抽出
+        const matches = cloudinaryUrl.match(/\/v\d+\/(.+)\.(jpg|png|gif|jpeg)/);
+        return matches ? matches[1] : '';
+    } catch (error) {
+        console.error('Extract public_id error:', error);
+        return '';
+    }
 }
+
+// モックアッププレビュー生成エンドポイント
+exports.generateMockupPreview = async (req, res) => {
+    try {
+        const { nftImageUrl, merchandiseType } = req.body;
+
+        if (!nftImageUrl || !merchandiseType) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required parameters'
+            });
+        }
+
+        const mockupUrl = await generateMockup(nftImageUrl, merchandiseType);
+
+        res.json({
+            success: true,
+            mockupUrl: mockupUrl
+        });
+
+    } catch (error) {
+        console.error('Generate mockup preview error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to generate mockup'
+        });
+    }
+};
 
 // 注文作成
 exports.createOrder = async (req, res) => {

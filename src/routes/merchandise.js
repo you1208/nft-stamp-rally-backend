@@ -5,6 +5,9 @@ const merchandiseController = require('../controllers/merchandiseController');
 // Get merchandise options
 router.get('/options', merchandiseController.getOptions);
 
+// Generate mockup preview
+router.post('/mockup', merchandiseController.generateMockupPreview);
+
 // Create merchandise order
 router.post('/order', merchandiseController.createOrder);
 
