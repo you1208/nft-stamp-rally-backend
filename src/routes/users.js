@@ -135,6 +135,40 @@ router.get('/:userId/wallet-export', async (req, res) => {
             error: 'Failed to export wallet info'
         });
     }
+    // Reset user data (for demo purposes)
+router.delete('/:userId/reset', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Delete user's composite NFTs
+        await prisma.compositeNft.deleteMany({
+            where: { userId }
+        });
+
+        // Delete user's stamps
+        await prisma.userStamp.deleteMany({
+            where: { userId }
+        });
+
+        // Delete user's merchandise orders
+        await prisma.merchandiseOrder.deleteMany({
+            where: { userId }
+        });
+
+        console.log(`User ${userId} data reset successfully`);
+
+        res.json({
+            success: true,
+            message: 'User data reset successfully'
+        });
+
+    } catch (error) {
+        console.error('Reset user data error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reset user data'
+        });
+    }
 });
 
 module.exports = router;
