@@ -135,7 +135,9 @@ router.get('/:userId/wallet-export', async (req, res) => {
             error: 'Failed to export wallet info'
         });
     }
-    // Reset user data (for demo purposes)
+});
+
+// Reset user data (for demo purposes)
 router.delete('/:userId/reset', async (req, res) => {
     try {
         const { userId } = req.params;
