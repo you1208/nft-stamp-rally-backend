@@ -137,40 +137,66 @@ router.get('/:userId/wallet-export', async (req, res) => {
     }
 });
 
-// Reset user data (for demo purposes)
+// Reset user data (for demo purposes) - IMPROVED VERSION
 router.delete('/:userId/reset', async (req, res) => {
     try {
         const { userId } = req.params;
+        
+        console.log(`=== Resetting data for user: ${userId} ===`);
+
+        // Check if user exists
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
+
+        if (!user) {
+            console.log('User not found');
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Delete user's merchandise orders (if table exists)
+        let deletedOrders = { count: 0 };
+        try {
+            deletedOrders = await prisma.merchandiseOrder.deleteMany({
+                where: { userId }
+            });
+            console.log(`Deleted ${deletedOrders.count} merchandise orders`);
+        } catch (orderError) {
+            console.log('MerchandiseOrder table does not exist yet, skipping...');
+        }
 
         // Delete user's composite NFTs
-        await prisma.compositeNft.deleteMany({
+        const deletedComposites = await prisma.compositeNft.deleteMany({
             where: { userId }
         });
+        console.log(`Deleted ${deletedComposites.count} composite NFTs`);
 
         // Delete user's stamps
-        await prisma.userStamp.deleteMany({
+        const deletedStamps = await prisma.userStamp.deleteMany({
             where: { userId }
         });
+        console.log(`Deleted ${deletedStamps.count} user stamps`);
 
-        // Delete user's merchandise orders
-        await prisma.merchandiseOrder.deleteMany({
-            where: { userId }
-        });
-
-        console.log(`User ${userId} data reset successfully`);
+        console.log(`✅ User ${userId} data reset successfully!`);
 
         res.json({
             success: true,
-            message: 'User data reset successfully'
+            message: 'User data reset successfully',
+            deleted: {
+                orders: deletedOrders.count,
+                nfts: deletedComposites.count,
+                stamps: deletedStamps.count
+            }
         });
 
     } catch (error) {
         console.error('Reset user data error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to reset user data'
+            error: 'Failed to reset user data: ' + error.message
         });
     }
 });
-
-module.exports = router;
