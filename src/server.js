@@ -1,9 +1,3 @@
-// Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
-// ⬇️ この行を追加
-const authMiddleware = require('./middleware/auth');
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
@@ -50,6 +44,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Import authentication middleware
+const authMiddleware = require('./middleware/auth');
+
 // Routes - Import and use each route carefully
 try {
     const authRoutes = require('./routes/auth');
@@ -77,7 +74,7 @@ try {
 
 try {
     const compositesRoutes = require('./routes/composites');
-    app.use('/api/composites', authMiddleware, compositesRoutes);  // ⬅️ authMiddleware を追加
+    app.use('/api/composites', authMiddleware, compositesRoutes);
     console.log('✓ Composites routes loaded');
 } catch (error) {
     console.error('Failed to load composites routes:', error.message);
@@ -103,7 +100,7 @@ try {
 
 // Health check
 app.get('/', (req, res) => {
-    res.json({ 
+    res.json({
         message: 'NFT Stamp Rally API is running',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
