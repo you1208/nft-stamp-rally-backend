@@ -30,11 +30,10 @@ router.post('/create', async (req, res) => {
     try {
         const { userId, backgroundStampId, characterStampId } = req.body;
 
-        console.log('Creating composite:', {
-            userId,
-            backgroundStampId,
-            characterStampId
-        });
+        console.log('=== Creating composite NFT ===');
+        console.log('User ID:', userId);
+        console.log('Background Stamp ID:', backgroundStampId);
+        console.log('Character Stamp ID:', characterStampId);
 
         // Validate input
         if (!userId || !backgroundStampId || !characterStampId) {
@@ -54,6 +53,7 @@ router.post('/create', async (req, res) => {
         });
 
         if (!backgroundStamp || !characterStamp) {
+            console.error('Stamps not found');
             return res.status(404).json({
                 success: false,
                 error: 'Stamps not found'
@@ -63,17 +63,12 @@ router.post('/create', async (req, res) => {
         console.log('Background stamp:', backgroundStamp.name, backgroundStamp.imageUrl);
         console.log('Character stamp:', characterStamp.name, characterStamp.imageUrl);
 
-        // For placeholder images or when Cloudinary is not available, create a simple composite URL
-        const isPlaceholder = backgroundStamp.imageUrl.includes('placehold.co') || !cloudinary;
-        
+        // Create composite image URL
+        // For demo, we'll use a simple side-by-side layout
         let compositeImageUrl;
         
-        if (isPlaceholder) {
-            // Create a simple placeholder composite
-            compositeImageUrl = `https://placehold.co/800x600/667eea/white?text=${encodeURIComponent(backgroundStamp.name + ' × ' + characterStamp.name)}`;
-            console.log('Using placeholder composite:', compositeImageUrl);
-        } else {
-            // Try to create composite with Cloudinary
+        // Check if we can use Cloudinary
+        if (cloudinary && !backgroundStamp.imageUrl.includes('unsplash')) {
             try {
                 const bgPublicId = extractCloudinaryPublicId(backgroundStamp.imageUrl);
                 const charPublicId = extractCloudinaryPublicId(characterStamp.imageUrl);
@@ -93,14 +88,21 @@ router.post('/create', async (req, res) => {
                         format: 'png',
                         quality: 'auto'
                     });
+                    console.log('Using Cloudinary composite:', compositeImageUrl);
                 } else {
-                    // Fallback to placeholder
-                    compositeImageUrl = `https://placehold.co/800x600/667eea/white?text=${encodeURIComponent(backgroundStamp.name + ' × ' + characterStamp.name)}`;
+                    throw new Error('Could not extract Cloudinary IDs');
                 }
             } catch (cloudinaryError) {
-                console.error('Cloudinary error:', cloudinaryError);
-                compositeImageUrl = `https://placehold.co/800x600/667eea/white?text=${encodeURIComponent(backgroundStamp.name + ' × ' + characterStamp.name)}`;
+                console.log('Cloudinary failed, using fallback');
+                compositeImageUrl = null;
             }
+        }
+        
+        // Fallback: Create a descriptive placeholder
+        if (!compositeImageUrl) {
+            const compositeName = `${backgroundStamp.name} × ${characterStamp.name}`;
+            compositeImageUrl = `https://placehold.co/800x600/667eea/white?text=${encodeURIComponent(compositeName)}&font=raleway`;
+            console.log('Using placeholder composite:', compositeImageUrl);
         }
 
         // Create composite NFT record
@@ -117,7 +119,8 @@ router.post('/create', async (req, res) => {
             }
         });
 
-        console.log('Composite created successfully:', composite.id);
+        console.log('✅ Composite created successfully:', composite.id);
+        console.log('Composite image URL:', compositeImageUrl);
 
         res.json({
             success: true,
@@ -126,7 +129,8 @@ router.post('/create', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Create composite error:', error);
+        console.error('❌ Create composite error:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({
             success: false,
             error: 'NFTの合成に失敗しました',

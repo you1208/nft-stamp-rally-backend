@@ -4,82 +4,79 @@ const prisma = new PrismaClient();
 async function main() {
     console.log('🌱 Seeding database...');
 
-    // Use simple, reliable placeholder images
-    const placeholderBase = 'https://placehold.co/600x400';
-
-    // Background stamps
+    // Use Unsplash F1/Racing themed images
     const backgrounds = [
         {
             type: 'background',
             name: 'Monaco Grand Prix',
-            imageUrl: `${placeholderBase}/667eea/white?text=Monaco+Grand+Prix`,
+            imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=400&fit=crop',
             qrCode: 'BG001',
             description: 'Legendary Monaco street circuit'
         },
         {
             type: 'background',
             name: 'Racing Circuit',
-            imageUrl: `${placeholderBase}/764ba2/white?text=Racing+Circuit`,
+            imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&h=400&fit=crop',
             qrCode: 'BG002',
             description: 'Modern F1 racing track'
         },
         {
             type: 'background',
             name: 'Pit Lane',
-            imageUrl: `${placeholderBase}/f093fb/white?text=Pit+Lane`,
+            imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
             qrCode: 'BG003',
             description: 'Behind the scenes action'
         },
         {
             type: 'background',
             name: 'Victory Podium',
-            imageUrl: `${placeholderBase}/4facfe/white?text=Victory+Podium`,
+            imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop',
             qrCode: 'BG004',
             description: 'Celebrate your victory'
         },
         {
             type: 'background',
             name: 'Night Race',
-            imageUrl: `${placeholderBase}/667eea/white?text=Night+Race`,
+            imageUrl: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=600&h=400&fit=crop',
             qrCode: 'BG005',
             description: 'Under the lights'
         }
     ];
 
-    // Character stamps
+    // Character stamps - F1 related
     const characters = [
         {
             type: 'character',
             name: 'F1 Racing Car',
-            imageUrl: `${placeholderBase}/ff6b6b/white?text=F1+Racing+Car`,
+            imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=400&h=400&fit=crop',
             qrCode: 'CH001',
             description: 'Alpine F1 Team car'
         },
         {
             type: 'character',
             name: 'Racing Helmet',
-            imageUrl: `${placeholderBase}/4caf50/white?text=Racing+Helmet`,
+            imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop',
             qrCode: 'CH002',
             description: 'Driver safety equipment'
         },
         {
             type: 'character',
             name: 'Alpine Logo',
-            imageUrl: `${placeholderBase}/2196f3/white?text=Alpine+Logo`,
+            imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=400&fit=crop',
             qrCode: 'CH003',
             description: 'Official team logo'
         },
         {
             type: 'character',
             name: 'Trophy',
-            imageUrl: `${placeholderBase}/ffc107/white?text=Trophy`,
+            imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=400&fit=crop',
             qrCode: 'CH004',
             description: 'Championship trophy'
         },
         {
             type: 'character',
             name: 'Checkered Flag',
-            imageUrl: `${placeholderBase}/9c27b0/white?text=Checkered+Flag`,
+            imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=400&fit=crop',
             qrCode: 'CH005',
             description: 'Race finish symbol'
         }
