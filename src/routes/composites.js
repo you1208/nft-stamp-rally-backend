@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
-const cloudinary = require('../config/cloudinary');
 
 const prisma = new PrismaClient();
+
+// Cloudinary is optional for placeholder mode
+let cloudinary = null;
+try {
+    cloudinary = require('../config/cloudinary');
+} catch (error) {
+    console.log('Cloudinary not configured, using placeholder images only');
+}
 
 // Helper function to extract Cloudinary public ID
 function extractCloudinaryPublicId(url) {
@@ -56,8 +63,8 @@ router.post('/create', async (req, res) => {
         console.log('Background stamp:', backgroundStamp.name, backgroundStamp.imageUrl);
         console.log('Character stamp:', characterStamp.name, characterStamp.imageUrl);
 
-        // For placeholder images, create a simple composite URL
-        const isPlaceholder = backgroundStamp.imageUrl.includes('placehold.co');
+        // For placeholder images or when Cloudinary is not available, create a simple composite URL
+        const isPlaceholder = backgroundStamp.imageUrl.includes('placehold.co') || !cloudinary;
         
         let compositeImageUrl;
         
