@@ -1,88 +1,60 @@
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const cors = require('cors');
 require('dotenv').config();
+require('./config/passport');
 
 const authRoutes = require('./routes/auth');
-const stampRoutes = require('./routes/stamps');
-const userRoutes = require('./routes/users');
-const compositeRoutes = require('./routes/composites');
-const nftRoutes = require('./routes/nft');
+const stampsRoutes = require('./routes/stamps');
+const usersRoutes = require('./routes/users');
+const compositesRoutes = require('./routes/composites');
+// const nftRoutes = require('./routes/nft');  // ← この行がある場合はコメントアウトまたは削除
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// CORS設定
+// Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5500',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: [
+        'http://localhost:3000',
+        'https://nft-stamp-rally.onrender.com'
+    ],
+    credentials: true
 }));
 
-// Bodyパーサー
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session設定
+// Session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  }
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
 }));
 
-// Passport初期化
+// Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ルート設定
+// Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/stamps', stampRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/composites', compositeRoutes);
-app.use('/api/nft', nftRoutes);
+app.use('/api/stamps', stampsRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/composites', compositesRoutes);
+// app.use('/api/nft', nftRoutes);  // ← この行もコメントアウト
 
-// ルートエンドポイント
+// Health check
 app.get('/', (req, res) => {
-  res.json({
-    message: 'NFT Stamp Rally API',
-    status: 'running',
-    version: '1.0.0',
-    endpoints: {
-      stamps: '/api/stamps',
-      users: '/api/users',
-      composites: '/api/composites',
-      auth: '/api/auth',
-      nft: '/api/nft'
-    }
-  });
+    res.json({ 
+        message: 'NFT Stamp Rally API is running',
+        timestamp: new Date().toISOString()
+    });
 });
 
-// エラーハンドリング
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    error: 'サーバーエラーが発生しました',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`API Base: http://localhost:${PORT}/api`);
 });
-
-// サーバー起動
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`API Base: http://localhost:${PORT}/api`);
-});
-
-module.exports = app;
-
-const merchandiseRoutes = require('./routes/merchandise');
-
-// 既存のルート設定の後に追加
-app.use('/api/merchandise', merchandiseRoutes);
