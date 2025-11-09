@@ -137,7 +137,7 @@ router.get('/:userId/wallet-export', async (req, res) => {
     }
 });
 
-// Reset user data (for demo purposes) - IMPROVED VERSION
+// Reset user data (for demo purposes)
 router.delete('/:userId/reset', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -200,3 +200,5 @@ router.delete('/:userId/reset', async (req, res) => {
         });
     }
 });
+
+module.exports = router;
