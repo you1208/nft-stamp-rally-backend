@@ -80,7 +80,8 @@ async function main() {
             type: 'character',
             name: 'Checkered Flag',
             imageUrl: `${placeholderBase}/9c27b0/white?text=Checkered+Flag`,
-            qrCode: 'CH005
+            qrCode: 'CH005',
+            description: 'Race finish symbol'
         }
     ];
 
