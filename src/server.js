@@ -1,3 +1,9 @@
+// Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ⬇️ この行を追加
+const authMiddleware = require('./middleware/auth');
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
@@ -71,7 +77,7 @@ try {
 
 try {
     const compositesRoutes = require('./routes/composites');
-    app.use('/api/composites', compositesRoutes);
+    app.use('/api/composites', authMiddleware, compositesRoutes);  // ⬅️ authMiddleware を追加
     console.log('✓ Composites routes loaded');
 } catch (error) {
     console.error('Failed to load composites routes:', error.message);
