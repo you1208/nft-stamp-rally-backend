@@ -74,7 +74,7 @@ try {
 
 try {
     const compositesRoutes = require('./routes/composites');
-    app.use('/api/composites', authMiddleware, compositesRoutes);
+    app.use('/api/composites', compositesRoutes);
     console.log('✓ Composites routes loaded');
 } catch (error) {
     console.error('Failed to load composites routes:', error.message);

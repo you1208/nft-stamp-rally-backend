@@ -86,15 +86,34 @@ async function composeImages(backgroundUrl, characterUrl) {
   }
 }
 
-// Create composite
 router.post('/create', async (req, res) => {
   try {
     console.log('\n=== Composite Creation Request ===');
-    console.log('User ID:', req.user?.id);
+    console.log('req.user:', req.user);
+    console.log('req.session:', req.session);
     console.log('Request Body:', JSON.stringify(req.body, null, 2));
 
-    const { backgroundId, characterId } = req.body;
-    const userId = req.user.id;
+    const { backgroundId, characterId, userId: bodyUserId } = req.body;
+
+    // ユーザーIDの取得（複数の方法を試す）
+    let userId;
+    if (req.user && req.user.id) {
+      userId = req.user.id;
+      console.log('User ID from req.user:', userId);
+    } else if (req.session && req.session.passport && req.session.passport.user) {
+      userId = req.session.passport.user.id || req.session.passport.user;
+      console.log('User ID from session:', userId);
+    } else if (bodyUserId) {
+      // フロントエンドから直接送信された場合
+      userId = bodyUserId;
+      console.log('User ID from request body:', userId);
+    } else {
+      console.error('No user ID found in request');
+      return res.status(401).json({
+        success: false,
+        error: 'User authentication required'
+      });
+    }
 
     // Validate input
     if (!backgroundId || !characterId) {
@@ -104,6 +123,8 @@ router.post('/create', async (req, res) => {
         error: 'Background ID and Character ID are required'
       });
     }
+
+    // ... 以下は既存のコードをそのまま
 
     console.log('\n--- Fetching Stamps ---');
     
