@@ -149,7 +149,8 @@ router.post('/create', async (req, res) => {
     }
 
     // Validate stamp types
-    if (background.type !== 'BACKGROUND' || character.type !== 'CHARACTER') {
+    // Validate stamp types (case-insensitive)
+if (background.type.toLowerCase() !== 'background' || character.type.toLowerCase() !== 'character') {
       console.error('Invalid stamp types:', { 
         backgroundType: background.type, 
         characterType: character.type 
